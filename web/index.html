@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Undercut</title>
+    <meta name="description" content="F1 forecasts that grade themselves: live win probabilities, title odds, race replays and strategy what-ifs, computed in your browser from public timing data." />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0d1014" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#eef0f2" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Saira+Condensed:wght@500;600;700;800&display=swap" />
+    <link rel="preconnect" href="https://api.jolpi.ca" crossorigin />
+    <link rel="preconnect" href="https://api.openf1.org" crossorigin />
+    <script>
+      // Apply the saved theme before first paint so there is no flash.
+      try {
+        var t = localStorage.getItem('undercut:theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+    <!--app-css-->
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Undercut computes everything in your browser, so it needs JavaScript turned on.</noscript>
+    <!--app-js-->
+  </body>
+</html>
