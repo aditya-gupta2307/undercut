@@ -1,0 +1,165 @@
+/*
+ * Undercut design tokens.
+ *
+ * Dark-first: a night race seen from the pit wall. Asphalt neutrals with a
+ * faint blue bias, one amber accent borrowed from the pit-exit light, and
+ * everything loud reserved for data — team colours, tyre compounds, and the
+ * timing screen's own purple / green / yellow vocabulary.
+ *
+ * Theme states: bare :root is dark; the OS light preference applies light
+ * unless the viewer has explicitly chosen dark; an explicit choice wins.
+ */
+
+:root {
+  color-scheme: dark;
+
+  --surface-0: #0b0e12;
+  --surface-1: #11161c;
+  --surface-2: #171d25;
+  --surface-3: #1f2731;
+  --line: #222a35;
+  --line-strong: #2f3947;
+  --ink: #eaeff4;
+  --ink-2: #a6b0bd;
+  --ink-3: #727d8b;
+  --ink-inverse: #0b0e12;
+
+  --accent: #ffb21e;
+  --accent-text: #ffbd3d;
+  --accent-ink: #1b1300;
+  --accent-soft: rgba(255, 178, 30, 0.13);
+  --accent-line: rgba(255, 178, 30, 0.45);
+
+  /* Timing-screen semantics: fastest overall, personal best, slower. */
+  --timing-purple: #b86bff;
+  --timing-green: #34d27f;
+  --timing-yellow: #f2cd3a;
+
+  /* Status (fixed meaning, always paired with an icon or word). */
+  --good: #2bc46b;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #ff5a55;
+
+  /* Tyres. Hard is white on track; it needs a darker step on light grounds. */
+  --tyre-soft: #ff3b3b;
+  --tyre-medium: #ffd21f;
+  --tyre-hard: #e9ecf0;
+  --tyre-inter: #2fbd5a;
+  --tyre-wet: #2f8dff;
+  --tyre-unknown: #6e7884;
+
+  /* Validated categorical slots for non-team series (model vs baselines). */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-muted: #4a5462;
+
+  --grid: #1c232d;
+  --axis: #36404d;
+  --neutral-band: rgba(255, 210, 31, 0.08);
+  --red-band: rgba(255, 90, 85, 0.1);
+
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px -18px rgba(0, 0, 0, 0.8);
+  --glow: radial-gradient(1200px 400px at 18% -120px, rgba(255, 178, 30, 0.07), transparent 70%);
+
+  --font-display: 'Saira Condensed', 'Barlow Condensed', 'Arial Narrow', 'DejaVu Sans Condensed', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --step--2: 0.6875rem;
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.0625rem;
+  --step-2: 1.375rem;
+  --step-3: 1.875rem;
+  --step-4: 2.625rem;
+  --step-5: 3.75rem;
+
+  --radius: 4px;
+  --radius-lg: 8px;
+  --gutter: clamp(16px, 3vw, 32px);
+  --maxw: 1320px;
+  --nav-h: 56px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --surface-0: #eceff2;
+    --surface-1: #ffffff;
+    --surface-2: #f5f6f8;
+    --surface-3: #e8ebef;
+    --line: #dce0e6;
+    --line-strong: #c3cad3;
+    --ink: #0d1116;
+    --ink-2: #485360;
+    --ink-3: #6e7986;
+    --ink-inverse: #ffffff;
+    --accent: #f0a000;
+    --accent-text: #9a5a00;
+    --accent-ink: #1b1300;
+    --accent-soft: rgba(240, 160, 0, 0.14);
+    --accent-line: rgba(176, 106, 0, 0.5);
+    --timing-purple: #8a2be2;
+    --timing-green: #0f8a4c;
+    --timing-yellow: #9a7400;
+    --good: #138a3f;
+    --warning: #b07a00;
+    --serious: #c2552a;
+    --critical: #cf2e2e;
+    --tyre-hard: #b9c0c8;
+    --tyre-medium: #e8b900;
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #eda100;
+    --series-muted: #b9c0c9;
+    --grid: #edf0f3;
+    --axis: #c3cad3;
+    --neutral-band: rgba(232, 185, 0, 0.12);
+    --red-band: rgba(207, 46, 46, 0.08);
+    --shadow: 0 1px 2px rgba(13, 17, 22, 0.05), 0 10px 28px -20px rgba(13, 17, 22, 0.35);
+    --glow: radial-gradient(1200px 400px at 18% -120px, rgba(240, 160, 0, 0.08), transparent 70%);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --surface-0: #eceff2;
+  --surface-1: #ffffff;
+  --surface-2: #f5f6f8;
+  --surface-3: #e8ebef;
+  --line: #dce0e6;
+  --line-strong: #c3cad3;
+  --ink: #0d1116;
+  --ink-2: #485360;
+  --ink-3: #6e7986;
+  --ink-inverse: #ffffff;
+  --accent: #f0a000;
+  --accent-text: #9a5a00;
+  --accent-ink: #1b1300;
+  --accent-soft: rgba(240, 160, 0, 0.14);
+  --accent-line: rgba(176, 106, 0, 0.5);
+  --timing-purple: #8a2be2;
+  --timing-green: #0f8a4c;
+  --timing-yellow: #9a7400;
+  --good: #138a3f;
+  --warning: #b07a00;
+  --serious: #c2552a;
+  --critical: #cf2e2e;
+  --tyre-hard: #b9c0c8;
+  --tyre-medium: #e8b900;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-muted: #b9c0c9;
+  --grid: #edf0f3;
+  --axis: #c3cad3;
+  --neutral-band: rgba(232, 185, 0, 0.12);
+  --red-band: rgba(207, 46, 46, 0.08);
+  --shadow: 0 1px 2px rgba(13, 17, 22, 0.05), 0 10px 28px -20px rgba(13, 17, 22, 0.35);
+  --glow: radial-gradient(1200px 400px at 18% -120px, rgba(240, 160, 0, 0.08), transparent 70%);
+}
