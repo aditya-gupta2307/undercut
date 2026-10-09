@@ -1,0 +1,13 @@
+# Dependencies and build output
+node_modules/
+web/dist/
+web/.dev/
+
+# Local screenshots from tests/e2e/shoot.ts
+web/*.png
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.log
