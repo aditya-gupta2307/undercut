@@ -57,6 +57,10 @@
   display: none;
 }
 
+.nav[data-end] {
+  mask-image: none;
+}
+
 .nav a {
   font-family: var(--font-display);
   font-weight: 600;
