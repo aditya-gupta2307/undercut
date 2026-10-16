@@ -2,11 +2,13 @@
 
 **F1 forecasts that grade themselves.** Undercut is a Formula 1 analytics site that fits a Bayesian ranking model in your browser, simulates every race and the rest of the championship thousands of times, replays real races lap by lap on the actual circuit, and lets you rewrite any driver's pit strategy to see where they would have finished. Then it checks its own homework: every forecast is backtested against what really happened.
 
+**Live site: [aditya-gupta2307.github.io/undercut](https://aditya-gupta2307.github.io/undercut/)**, on desktop and phone.
+
 It is a static site — no server, no database, no API keys. The browser pulls public timing data from [Jolpica](https://github.com/jolpica/jolpica-f1) and [OpenF1](https://openf1.org) and does everything else itself.
 
 ![Pit Wall](web/docs/screenshots/pit-wall.jpg)
 
-> The screenshots in this README come from the project's test suite, which runs the site against a simulated F1 season. Run normally, the site shows real data.
+> The screenshots in this README come from the project's test suite, which runs the site against a simulated F1 season. The live site shows real data.
 
 ## What's inside
 
@@ -56,17 +58,7 @@ To make it yours, edit `web/src/content/site.ts` (your name, links to your repos
 
 ## Deploy (GitHub Pages)
 
-1. Make the repository public. (Pages on a private repository needs GitHub Pro, which is free with the GitHub Student Developer Pack.)
-2. In the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
-3. Move the workflow into place and push to `main`:
-
-   ```bash
-   mkdir -p .github/workflows
-   git mv web/docs/deploy-web.yml .github/workflows/deploy-web.yml
-   git commit -m "Deploy to GitHub Pages" && git push
-   ```
-
-   From then on, every push to `main` type-checks, runs the unit and browser tests, builds, and publishes the site at `https://aditya-gupta2307.github.io/undercut/`.
+Every push to `main` runs [`.github/workflows/deploy-web.yml`](.github/workflows/deploy-web.yml): it type-checks, runs the unit and browser tests, builds the site and publishes it to GitHub Pages. To run your own copy, fork the repository and set **Settings → Pages → Source** to **GitHub Actions**.
 
 The site uses hash URLs (`/#/race/2026/16`), so every page can be refreshed or shared on any static host without server rules. `dist/` also works on Netlify, Vercel or any web server.
 
