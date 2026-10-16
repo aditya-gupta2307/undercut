@@ -9,7 +9,8 @@
  *               + remaining laps × the car's pace
  *               + pace drift (tyres, fuel, strategy: grows with laps left)
  *               + lap-to-lap noise (grows with √laps left)
- *               + any pit stop the car still owes
+ *               + any pit stop the car still owes, including the rest of
+ *                 a stop it is in the middle of as it crosses the line
  *               + the chance of a safety car, which bunches the field up
  *                 and makes a stop cheap
  *               + the chance of retiring
@@ -147,9 +148,25 @@ function simulateFrom(input: InRaceInput, L: number, total: number, sims: number
   }
   const remaining = total - L;
   const pace = paceEstimates(input, Math.max(L, 2), running);
-  const base = running.map((d) => timing.crossing.get(d)![L]!);
+  // A car that pitted on this lap crossed the line in the pit lane, with most
+  // of its stop still to come. Charge it the part of the usual loss its in-lap
+  // has not already shown (a stop under a safety car costs less).
+  const pitting = running.map((d) => pits.some((p) => p.driverNumber === d && p.lap === L));
+  const others = running.filter((d, i) => !pitting[i] && !timing.outLaps.get(d)?.has(L)).map((d) => timing.lapMs.get(d)![L]!);
+  const fieldLap = median(others.filter((x) => !Number.isNaN(x)));
+  const neutral = timing.neutralLaps.has(L) || timing.neutralLaps.has(L + 1);
+  const base = running.map((d, i) => {
+    const t = timing.crossing.get(d)![L]!;
+    if (!pitting[i]) return t;
+    const inLap = timing.lapMs.get(d)![L]!;
+    const reference = Number.isFinite(fieldLap) ? fieldLap : pace.get(d)!;
+    const shown = Number.isNaN(inLap) ? 0 : Math.max(0, inLap - reference);
+    return t + Math.max(0, (neutral ? 0.6 : 1) * pitLoss - shown);
+  });
   const leaderPace = pace.get(running[0]!)!;
-  const owes = running.map((d) => {
+  const owes = running.map((d, i) => {
+    // Fresh tyres are going on right now.
+    if (pitting[i]) return { mandatory: 0, extra: 0 };
     const st = stintStateAt(stints, d, L, pits);
     const wet = st.compoundsUsed.has('INTERMEDIATE') || st.compoundsUsed.has('WET');
     // Dry-race rule: two different dry compounds must be used.
