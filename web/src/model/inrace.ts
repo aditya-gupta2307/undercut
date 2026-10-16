@@ -14,9 +14,9 @@
  *                 and makes a stop cheap
  *               + the chance of retiring
  *
- * and counts who comes out on top. Pace is measured from the car's own
- * recent clean laps, shrunk toward the field's pace (plus its qualifying gap,
- * if known) so that two lucky laps do not make a hero.
+ * and counts who comes out on top. Pace is each car's recent gap to the field
+ * on the same laps (see paceEstimates), so changing conditions do not distort
+ * it, shrunk toward its qualifying gap so that two lucky laps do not make a hero.
  *
  * The chart this feeds is the "swing" chart: the lap the race was decided is
  * the lap where the winner's line jumps.
@@ -65,31 +65,70 @@ const PACE_DRIFT_MS = 140;
 const SC_HAZARD = 0.014;
 const DNF_HAZARD = 0.0016;
 const SC_SPACING_MS = 900;
-const PACE_WINDOW = 10;
+/** Most recent usable laps per car that the pace estimate uses. */
+const PACE_LAPS = 6;
+/** How far back to look for them when stops and safety cars leave few. */
+const LOOKBACK = 30;
 const SHRINK_LAPS = 4;
+/** A lap the field ran this much slower than the laps around it (yellow flags, a pit cycle) is not a reference. */
+const DISRUPTED = 1.12;
 
-function paceEstimates(input: InRaceInput, L: number, drivers: number[]): Map<number, number> {
-  const { timing } = input;
-  const own = new Map<number, number[]>();
-  const all: number[] = [];
-  for (const d of drivers) {
+/**
+ * Field reference lap time for each recent lap: the median clean lap, from laps
+ * where enough cars ran a clean one and the field was not slowed as a whole.
+ */
+export function fieldReferenceLaps(timing: RaceTiming, L: number, carsRunning: number): Map<number, number> {
+  const minCars = Math.min(5, Math.max(2, Math.ceil(carsRunning / 3)));
+  const ref = new Map<number, number>();
+  for (let k = Math.max(2, L - LOOKBACK + 1); k <= L; k++) {
     const xs: number[] = [];
-    const dur = timing.lapMs.get(d)!;
-    for (let k = Math.max(2, L - PACE_WINDOW + 1); k <= L; k++) if (isCleanLap(timing, d, k)) xs.push(dur[k]!);
-    // Drop obvious outliers (a lock-up, traffic) relative to the car's own median.
-    const m = median(xs);
-    const kept = xs.filter((x) => x < m * 1.04);
-    own.set(d, kept);
-    all.push(...kept);
+    for (const d of timing.drivers) if (isCleanLap(timing, d, k)) xs.push(timing.lapMs.get(d)![k]!);
+    if (xs.length >= minCars) ref.set(k, median(xs));
   }
-  const field = median(all);
+  const laps = [...ref.keys()].sort((a, b) => a - b);
+  const slow = laps.filter((k, i) => {
+    const around = laps.slice(Math.max(0, i - 3), i + 4).filter((j) => j !== k).map((j) => ref.get(j)!);
+    return around.length > 0 && ref.get(k)! > median(around) * DISRUPTED;
+  });
+  for (const k of slow) ref.delete(k);
+  return ref;
+}
+
+/**
+ * Each car's lap pace at the end of lap L, measured against the field on the
+ * same laps:
+ *
+ *   pace = the field's latest reference lap + the car's median gap to the field
+ *
+ * Comparing lap by lap means a drying track, fuel burn or a yellow flag that
+ * slows everyone cannot make one car look quick just because its recent laps
+ * happened to fall at a different moment. The gap uses the car's most recent
+ * clean laps (looking further back when a stop or a safety car leaves too few)
+ * and is shrunk toward its qualifying gap, so two lucky laps do not make a hero.
+ */
+export function paceEstimates(input: InRaceInput, L: number, drivers: number[]): Map<number, number> {
+  const { timing } = input;
+  const ref = fieldReferenceLaps(timing, L, drivers.length);
+  const refLaps = [...ref.keys()].sort((a, b) => b - a); // newest first
+  const fieldNow = refLaps.length ? ref.get(refLaps[0]!)! : 90000;
+  const quali = input.qualiGapMs;
+  const qualiGaps = drivers.map((d) => quali?.get(d)).filter((x): x is number => x !== undefined);
+  const qualiMid = qualiGaps.length ? median(qualiGaps) : 0;
   const out = new Map<number, number>();
   for (const d of drivers) {
-    const xs = own.get(d)!;
-    const prior = (Number.isFinite(field) ? field : 90000) + 0.8 * (input.qualiGapMs?.get(d) ?? 0);
-    const n = xs.length;
-    const mine = n ? median(xs) : prior;
-    out.set(d, (n * mine + SHRINK_LAPS * prior) / (n + SHRINK_LAPS));
+    const dur = timing.lapMs.get(d)!;
+    const gaps: number[] = [];
+    for (const k of refLaps) {
+      if (gaps.length >= PACE_LAPS) break;
+      if (isCleanLap(timing, d, k)) gaps.push(dur[k]! - ref.get(k)!);
+    }
+    // Drop laps well off the car's own typical gap (a lock-up, traffic).
+    const m = median(gaps);
+    const kept = gaps.filter((x) => x < m + 1500);
+    const prior = 0.8 * ((quali?.get(d) ?? qualiMid) - qualiMid);
+    const n = kept.length;
+    const gap = ((n ? n * median(kept) : 0) + SHRINK_LAPS * prior) / (n + SHRINK_LAPS);
+    out.set(d, fieldNow + gap);
   }
   return out;
 }
