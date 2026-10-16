@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react';
 import { jolpicaQueue, openf1Queue, type QueueStatus } from '../lib/http';
 import { useSettings, type ThemeChoice } from './settings';
 import { Link, useRoute } from './router';
@@ -131,6 +131,28 @@ function TopBar() {
   const route = useRoute();
   const { rookie, setRookie } = useSettings();
   const section = route.path[0] ?? '';
+  const nav = useRef<HTMLElement>(null);
+  // On a phone the links scroll sideways: bring the current page's link into view.
+  useEffect(() => {
+    const bar = nav.current;
+    const link = bar?.querySelector<HTMLElement>('a[aria-current="page"]');
+    if (!bar || !link || bar.scrollWidth <= bar.clientWidth) return;
+    const left = link.getBoundingClientRect().left - bar.getBoundingClientRect().left + bar.scrollLeft;
+    bar.scrollTo({ left: Math.max(0, left - (bar.clientWidth - link.offsetWidth) / 2), behavior: 'smooth' });
+  }, [section]);
+  // The fade on the right edge hints at more links; drop it once the last one is in view.
+  useEffect(() => {
+    const bar = nav.current;
+    if (!bar) return undefined;
+    const update = () => bar.toggleAttribute('data-end', bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 2);
+    update();
+    bar.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      bar.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
   return (
     <header className="topbar">
       <div className="topbar-inner">
@@ -138,7 +160,7 @@ function TopBar() {
           <Logo />
           <span className="brand-word">Undercut</span>
         </Link>
-        <nav className="nav" aria-label="Main">
+        <nav className="nav" aria-label="Main" ref={nav}>
           {NAV.map((n) => (
             <Link key={n.to} to={n.to} aria-current={n.match === section || (n.match === 'season' && section === 'race') ? 'page' : undefined}>
               {n.label}
