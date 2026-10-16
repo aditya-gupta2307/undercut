@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { combineDateTime, durationToMs, hexColour, lapsDown, parseIso, secondsToMs } from '../../src/data/parse';
+import { parseWeather } from '../../src/data/openf1';
 
 test('parseIso handles OpenF1 six-digit fractions and offsets', () => {
   assert.equal(parseIso('2023-09-16T13:59:07.606000+00:00'), Date.UTC(2023, 8, 16, 13, 59, 7, 606));
@@ -48,4 +49,17 @@ test('secondsToMs and hexColour', () => {
   assert.equal(hexColour('#00d7b6'), '#00D7B6');
   assert.equal(hexColour('nope'), null);
   assert.equal(hexColour(null), null);
+});
+
+test('weather sensor dropouts (zeros) count as missing readings', () => {
+  const ok = parseWeather({ date: '2026-10-04T08:40:00+00:00', air_temperature: 25.4, track_temperature: 31.2, humidity: 84, pressure: 1006.8, rainfall: 1, wind_speed: 0, wind_direction: 0 });
+  assert.equal(ok?.trackTemp, 31.2);
+  assert.equal(ok?.windSpeed, 0);
+  assert.equal(ok?.windDirection, 0);
+  assert.equal(ok?.rainfall, true);
+  const dropout = parseWeather({ date: '2026-10-04T08:41:00+00:00', air_temperature: 25.4, track_temperature: 0, humidity: 0, pressure: 0, rainfall: 0, wind_speed: 1.2, wind_direction: 180 });
+  assert.equal(dropout?.trackTemp, null);
+  assert.equal(dropout?.humidity, null);
+  assert.equal(dropout?.pressure, null);
+  assert.equal(dropout?.airTemp, 25.4);
 });
