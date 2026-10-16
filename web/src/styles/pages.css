@@ -381,6 +381,15 @@
   pointer-events: none;
 }
 
+/* Keep all three race tabs on screen on a phone. */
+@media (max-width: 640px) {
+  .tabs a {
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+    padding: 8px 9px 10px;
+  }
+}
+
 .verdict {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
