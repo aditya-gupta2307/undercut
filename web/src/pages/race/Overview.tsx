@@ -6,7 +6,7 @@ import { useRaceForecast, configKey, useModelConfig } from '../../app/model';
 import { useSettings, SURFACE } from '../../app/settings';
 import { useTeams } from '../../app/teams';
 import type { LinkedSessions } from '../../data/link';
-import type { RaceEvent, Season } from '../../data/types';
+import type { RaceControlMessage, RaceEvent, Season } from '../../data/types';
 import { lapTime, pct, seconds } from '../../lib/format';
 import { buildRaceTiming } from '../../model/raceTiming';
 import { inRaceWinProbability } from '../../model/inrace';
@@ -15,6 +15,16 @@ import { ForecastTable } from '../../components/ForecastTable';
 import { Term, RookieNote } from '../../components/Term';
 import { carDirectory, type CarInfo } from './raceContext';
 import { PositionChart, RaceTraceChart, StintChart, SwingChart } from './charts';
+
+/**
+ * Messages worth a headline: neutralisations, red flags, penalties and
+ * investigations, the start and the finish. Local yellows, blue flags and
+ * track-limits warnings are routine; a wet race can have a hundred of them.
+ */
+function isKeyMessage(m: RaceControlMessage): boolean {
+  if (/SAFETY CAR|RED FLAG|CHEQUERED|PENALTY|INVESTIGATION|STARTED|SUSPENDED|RESUME|DISQUALIF|RETIRED|STOPPED/i.test(m.message)) return true;
+  return m.flag !== null && ['RED', 'CHEQUERED', 'BLACK', 'BLACK AND ORANGE'].includes(m.flag);
+}
 
 function flagClass(flag: string | null, message: string): string {
   if (/SAFETY CAR/i.test(message)) return 'flag-SC';
@@ -312,7 +322,7 @@ export function Overview({
             >
               <ul className="rc-feed" aria-label="Race control messages">
                 {data.raceControl
-                  .filter((m) => rcFilter === 'all' || /SAFETY CAR|RED|CHEQUERED|PENALTY|INVESTIGATION|STARTED|DISQUALIF|RETIRED|STOPPED/i.test(m.message) || (m.flag !== null && !['BLUE', 'CLEAR', 'GREEN'].includes(m.flag)))
+                  .filter((m) => rcFilter === 'all' || isKeyMessage(m))
                   .map((m, i) => (
                     <li key={i}>
                       <span className="lap">{m.lap !== null ? `L${m.lap}` : ''}</span>
