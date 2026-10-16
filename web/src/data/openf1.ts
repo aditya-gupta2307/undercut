@@ -195,15 +195,25 @@ export function parseRaceControl(r: Raw): RaceControlMessage | null {
   };
 }
 
+/**
+ * A temperature, humidity or pressure reading. The trackside stations send 0
+ * when a sensor drops out, and nothing at a Grand Prix is really 0 °C, 0 % or
+ * 0 mbar, so those count as missing.
+ */
+function sensor(value: unknown): number | null {
+  const x = toFloat(value);
+  return x !== null && x > 0 ? x : null;
+}
+
 export function parseWeather(r: Raw): WeatherSample | null {
   const at = parseIso(r.date);
   if (at === null) return null;
   return {
     at,
-    airTemp: toFloat(r.air_temperature),
-    trackTemp: toFloat(r.track_temperature),
-    humidity: toFloat(r.humidity),
-    pressure: toFloat(r.pressure),
+    airTemp: sensor(r.air_temperature),
+    trackTemp: sensor(r.track_temperature),
+    humidity: sensor(r.humidity),
+    pressure: sensor(r.pressure),
     rainfall: Number(r.rainfall ?? 0) > 0,
     windSpeed: toFloat(r.wind_speed),
     windDirection: toInt(r.wind_direction),
