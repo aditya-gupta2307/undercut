@@ -12,6 +12,7 @@ import { useMemo, useState, type PointerEvent as ReactPointerEvent, type ReactNo
 import { scaleLinear } from 'd3-scale';
 import { line as d3line, curveMonotoneX, curveLinear } from 'd3-shape';
 import { useWidth } from '../../app/data';
+import { layoutEndLabels } from './endLabels';
 
 export interface LineSeries {
   id: string;
@@ -135,13 +136,7 @@ export function LineChart(props: LineChartProps) {
       const y = ys(clampY(s.values[last]!));
       items.push({ id: s.id, text: s.label, y, ty: y, x: xs(x[last]!), colour: s.colour });
     }
-    items.sort((a, b) => a.y - b.y);
-    const gap = 13;
-    for (let i = 1; i < items.length; i++) if (items[i]!.ty - items[i - 1]!.ty < gap) items[i]!.ty = items[i - 1]!.ty + gap;
-    const overflow = items.length ? items[items.length - 1]!.ty - innerH : 0;
-    if (overflow > 0) for (const it of items) it.ty -= overflow;
-    for (let i = items.length - 2; i >= 0; i--) if (items[i + 1]!.ty - items[i]!.ty < gap) items[i]!.ty = items[i + 1]!.ty - gap;
-    return items;
+    return layoutEndLabels(items, innerH);
   })();
 
   const onMove = (e: ReactPointerEvent<SVGRectElement>) => {
