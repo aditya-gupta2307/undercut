@@ -104,7 +104,8 @@ export function LineChart(props: LineChartProps) {
 
   const w = Math.max(280, width);
   const innerW = w - M.left - M.right;
-  const innerH = height - M.top - M.bottom;
+  // An x-axis title gets its own row under the tick labels.
+  const innerH = height - M.top - M.bottom - (props.xLabel ? 8 : 0);
   const xs = scaleLinear().domain([x[0] ?? 0, x[x.length - 1] ?? 1]).range([0, innerW]);
   const ys = scaleLinear().domain(yDomain).range(yInvert ? [0, innerH] : [innerH, 0]);
   const clampY = (v: number) => Math.max(Math.min(yDomain[0], yDomain[1]), Math.min(Math.max(yDomain[0], yDomain[1]), v));
@@ -206,7 +207,7 @@ export function LineChart(props: LineChartProps) {
             </text>
           ))}
           {props.xLabel ? (
-            <text className="axis-title" x={innerW} y={innerH + 28} textAnchor="end" dy="-0.1em">
+            <text className="axis-title" x={innerW} y={innerH + 33} textAnchor="end">
               {props.xLabel}
             </text>
           ) : null}
