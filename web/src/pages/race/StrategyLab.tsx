@@ -440,6 +440,7 @@ function PitWindowChart({ curve, realStop }: { curve: { lap: number; deltaMs: nu
         tooltipTitle={(l) => `Stop on lap ${l}`}
         tooltipFormat={(v) => secs(v * 1000)}
         markers={markers}
+        markerLabels="top"
         endLabels={false}
         legend={false}
         ariaLabel="Race time versus the real strategy for each possible one-stop lap"
